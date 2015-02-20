@@ -22,10 +22,11 @@ CFlib: Python calculator for crystal fields
 Crystal Field calculations using the Stevens Operator formalism.
 """
 
-from scipy.linalg import eigh
+from ConfigParser import SafeConfigParser
 import numpy as np
+from scipy.linalg import eigh
 
-REs = ["Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb"]
+REs = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb']
 Jf = [2.5, 4.0, 4.5, 4.0, 2.5, 0.0, 3.5, 6.0, 7.5, 8.0, 7.5, 6.0, 3.5]
 gJ = [6.0/7.0, 4.0/5.0, 8.0/ 11.0, 3.0 / 5.0, 2.0 / 7.0, 0.0, 2.0, 3.0 / 2.0, 4.0 / 3.0,
       5.0 / 4.0, 6.0 / 5.0, 7.0 / 6.0, 8.0 / 7.0]
@@ -60,41 +61,29 @@ class CF(object):
     """
 
     def __init__(self, RE=None, title=None, parfile=None):
-        """Initializes the CF object or read it from a shelved file."""
+        """Initializes the CF object or read it from a file."""
 
-        if RE:
-            self.RE = RE
-            try:
-                self.index = REs.index(self.RE)
-            except ValueError:
-                print "CFerror: Rare Earth not recognized"
-                return
+        if parfile:
+            self.load(parfile)
         else:
-            self.index = 1
-        self.title = title
-        self.Nf = self.index + 1
-        self.J = Jf[self.index]
-        self.size = int(2 * self.J + 1)
-        self.gJ = gJ[self.index]
-        self.r2 = r2[self.index]
-        self.r4 = r4[self.index]
-        self.r6 = r6[self.index]
-        self.alphaJ = alphaJ[self.index]
-        self.betaJ = betaJ[self.index]
-        self.gammaJ = gammaJ[self.index]
-        self.B20 = 0.0
-        self.B40 = 0.0
-        self.B60 = 0.0
-        self.B22 = 0.0
-        self.B42 = 0.0
-        self.B62 = 0.0
-        self.B43 = 0.0
-        self.B63 = 0.0
-        self.B44 = 0.0
-        self.B64 = 0.0
-        self.B66 = 0.0
-        self.Hz = 0.0
-        self.Hx = 0.0
+            if RE:
+                self.RE = RE
+            else:
+                self.RE = 'Ce'
+            self.B20 = 0.0
+            self.B40 = 0.0
+            self.B60 = 0.0
+            self.B22 = 0.0
+            self.B42 = 0.0
+            self.B62 = 0.0
+            self.B43 = 0.0
+            self.B63 = 0.0
+            self.B44 = 0.0
+            self.B64 = 0.0
+            self.B66 = 0.0
+            self.Hz = 0.0
+            self.Hx = 0.0
+            self.title = title
         self.H = np.matrix(np.zeros((self.size, self.size), dtype='float64'))
         self.Jz = np.zeros((self.size, self.size), dtype='float64')
         self.Jp = np.zeros((self.size, self.size), dtype='float64')
@@ -111,18 +100,6 @@ class CF(object):
         self.Jx_exp = 0.0
         self.muz = 0.0
         self.mux = 0.0
-
-        if parfile:
-            import shelve
-
-            try:
-                db = shelve.open(parfile)
-                if "CF" in db:
-                    for item in db["CF"].__dict__.keys():
-                        self.__dict__[item] = db["CF"].__dict__[item]
-                db.close()
-            except:
-                print "CFerror: Error in reading file"
 
     def __str__(self):
         """Print the rare earth, CF parameters, and, if diagonalized, 
@@ -151,7 +128,7 @@ class CF(object):
         if line:
             output.append(" ".join(line))
 
-        self.Ham()
+        self.get_peaks()
         Jx_exp, Jz_exp, mux, muz = self.get_moments()
 
         if muz != 0.0 or mux != 0.0:
@@ -171,6 +148,7 @@ class CF(object):
                             operator = "+"
                         line.append("%s%7.4f|%g>" % (operator, abs(self.EF[j, i]), Jz))
                 output.append(" ".join(line))
+
         if self.peaks:
             output.append("Crystal Field Transitions")
             if self.T != self.Tused:
@@ -178,37 +156,120 @@ class CF(object):
             output.append("Temperature: %g K" % self.T)
             for peak in self.peaks:
                 output.append("Energy: %8.3f meV  Intensity: %8.4f" % peak)
+
         return "\n".join(output)
 
-    def save(self):
+    def save(self, parfile=None):
         """Store the current object for later use."""
 
-        import shelve
+        parser = SafeConfigParser()
+        parser.optionxform = str
 
-        db = None
-        try:
-            if self.title:
-                db = shelve.open("%s.db" % self.title)
-            else:
-                db = shelve.open("CF.db")
-            db["CF"] = self
-        finally:
-            if db:
-                db.close()
+        parser.add_section('material')        
+        parser.set('material', 'title', str(self.title))
+        parser.set('material', 'RE', str(self.RE))
+        
+        parser.add_section('parameters')        
+        parser.set('parameters', 'B20', str(self.B20))
+        parser.set('parameters', 'B22', str(self.B22))
+        parser.set('parameters', 'B40', str(self.B40))
+        parser.set('parameters', 'B42', str(self.B42))
+        parser.set('parameters', 'B43', str(self.B43))
+        parser.set('parameters', 'B44', str(self.B44))
+        parser.set('parameters', 'B60', str(self.B60))
+        parser.set('parameters', 'B62', str(self.B62))
+        parser.set('parameters', 'B63', str(self.B63))
+        parser.set('parameters', 'B64', str(self.B64))
+        parser.set('parameters', 'B66', str(self.B66))
+        parser.set('parameters', 'Hz', str(self.Hz))
+        parser.set('parameters', 'Hx', str(self.Hx))
 
-    def read(self, parfile):
+        if parfile is None:
+            parfile = '%s.cfg' % self.title
+        with open(parfile, 'wb') as cfg:
+            parser.write(cfg)
+
+    def load(self, parfile):
         """Load a saved version of the current object."""
 
-        import shelve
+        parser = SafeConfigParser()
+        parser.read(parfile)
+        
+        self.title = parser.get('material', 'title')
+        self.RE = parser.get('material', 'RE')
+        
+        self.B20 = parser.getfloat('parameters', 'B20')
+        self.B22 = parser.getfloat('parameters', 'B22')
+        self.B40 = parser.getfloat('parameters', 'B40')
+        self.B42 = parser.getfloat('parameters', 'B42')
+        self.B43 = parser.getfloat('parameters', 'B43')
+        self.B44 = parser.getfloat('parameters', 'B44')
+        self.B60 = parser.getfloat('parameters', 'B60')
+        self.B62 = parser.getfloat('parameters', 'B62')
+        self.B63 = parser.getfloat('parameters', 'B63')
+        self.B64 = parser.getfloat('parameters', 'B64')
+        self.B66 = parser.getfloat('parameters', 'B66')
+        self.Hz = parser.getfloat('parameters', 'Hz')
+        self.Hx = parser.getfloat('parameters', 'Hx')
+        
+        self.initialize()
 
-        try:
-            db = shelve.open(parfile)
-            if "CF" in db:
-                for item in db["CF"].__dict__.keys():
-                    self.__dict__[item] = db["CF"].__dict__[item]
-            db.close()
-        except:
-            print "CFerror: Error in reading file"
+    def initialize(self):
+        self.H = np.matrix(np.zeros((self.size, self.size), dtype='float64'))
+        self.Jz = np.zeros((self.size, self.size), dtype='float64')
+        self.Jp = np.zeros((self.size, self.size), dtype='float64')
+        self.Jm = np.zeros((self.size, self.size), dtype='float64')
+        self.TP = np.zeros((self.size, self.size), dtype='float64')
+        self.EF = np.zeros((self.size, self.size), dtype='float64')
+        self.EV = np.zeros(self.size, dtype='float64')
+
+    @property
+    def index(self):
+        return REs.index(self.RE)
+
+    @property
+    def Nf(self):
+        return self.index + 1
+
+    @property
+    def J(self):
+        return Jf[self.index]
+
+    @property
+    def size(self):
+        return int(2 * self.J + 1)
+
+    @property
+    def gJ(self):
+        return gJ[self.index]
+
+    @property
+    def r2(self):
+        return r2[self.index]
+
+    @property
+    def r2(self):
+        return r2[self.index]
+
+    @property
+    def r4(self):
+        return r4[self.index]
+
+    @property
+    def r6(self):
+        return r6[self.index]
+
+    @property
+    def alphaJ(self):
+        return alphaJ[self.index]
+
+    @property
+    def betaJ(self):
+        return betaJ[self.index]
+
+    @property
+    def gammaJ(self):
+        return gammaJ[self.index]
 
     def CFham(self):
         """Determine the CF Hamiltonian based on the input parameters."""
@@ -296,7 +357,7 @@ class CF(object):
 
         return self.CFham() + self.MFham()
 
-    def diagonalize(self):
+    def EFS(self):
         """Determine the eigenvalues and eigenfunctions of the total Hamiltonian."""
 
         H = self.Ham()
@@ -409,6 +470,8 @@ class CF(object):
 
         from nexusformat.nexus import NXfield, NXentry, NXsample, NXdata
 
+        if T is None:
+            T = self.T
         S = self.spectrum(eps, sigma, T, Hx, Hz)
         entry = NXentry()
         entry.title = "Crystal Field Spectra for %s at %s K" % (self.title, T)
