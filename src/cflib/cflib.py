@@ -454,8 +454,10 @@ class CF(object):
 
         peaks = self.get_peaks(T, Hx, Hz)
 
-        if eps is None: eps = np.linspace(-1.1 * self.EV[-1], 1.1 * self.EV[-1], 501)
-        if sigma is None: sigma = 0.01 * (max(eps) - min(eps))
+        if eps is None: 
+            eps = np.linspace(-1.1 * self.EV[-1], 1.1 * self.EV[-1], 501)
+        if sigma is None: 
+            sigma = 0.01 * (max(eps) - min(eps))
 
         S = np.zeros(eps.size, dtype='float64')
 
@@ -470,8 +472,6 @@ class CF(object):
 
         from nexusformat.nexus import NXfield, NXentry, NXsample, NXdata
 
-        if T is None:
-            T = self.T
         S = self.spectrum(eps, sigma, T, Hx, Hz)
         entry = NXentry()
         entry.title = "Crystal Field Spectra for %s at %s K" % (self.title, T)
