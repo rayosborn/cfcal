@@ -26,25 +26,28 @@ from ConfigParser import SafeConfigParser
 import numpy as np
 from scipy.linalg import eigh
 
-REs = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb']
+REs = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 
+       'Yb']
 Jf = [2.5, 4.0, 4.5, 4.0, 2.5, 0.0, 3.5, 6.0, 7.5, 8.0, 7.5, 6.0, 3.5]
-gJ = [6.0/7.0, 4.0/5.0, 8.0/ 11.0, 3.0 / 5.0, 2.0 / 7.0, 0.0, 2.0, 3.0 / 2.0, 4.0 / 3.0,
-      5.0 / 4.0, 6.0 / 5.0, 7.0 / 6.0, 8.0 / 7.0]
+gJ = [6.0/7.0, 4.0/5.0, 8.0/11.0, 3.0/5.0, 2.0/7.0, 0.0, 2.0, 3.0/2.0, 4.0/3.0,
+      5.0/4.0, 6.0/5.0, 7.0/6.0, 8.0/7.0]
 #<r^2> radial integral for 3+ f-electrons
-r2 = [0.3666, 0.3380, 0.3120, 0.2917, 0.2728, 0.2569, 0.2428, 0.2302, 0.2188, 0.2085,
-      0.1991, 0.1905, 0.1826]
+r2 = [0.3666, 0.3380, 0.3120, 0.2917, 0.2728, 0.2569, 0.2428, 0.2302, 0.2188, 
+      0.2085, 0.1991, 0.1905, 0.1826]
 #<r^4> radial integral for 3+ f-electrons
-r4 = [0.3108, 0.2670, 0.2015, 0.1488, 0.1772, 0.1584, 0.1427, 0.1295, 0.1180, 0.1081,
-      0.0996, 0.0921, 0.0854]
+r4 = [0.3108, 0.2670, 0.2015, 0.1488, 0.1772, 0.1584, 0.1427, 0.1295, 0.1180, 
+      0.1081, 0.0996, 0.0921, 0.0854]
 #<r^6> radial integral for 3+ f-electrons
-r6 = [0.5119, 0.4150, 0.3300, 0.2787, 0.2317, 0.1985, 0.1720, 0.1505, 0.1328, 0.1810,
-      0.1058, 0.0953, 0.0863]
+r6 = [0.5119, 0.4150, 0.3300, 0.2787, 0.2317, 0.1985, 0.1720, 0.1505, 0.1328, 
+      0.1810, 0.1058, 0.0953, 0.0863]
 #Second-degree Stevens factors for 3+ f-electrons
-alphaJ = [-5.7143e-02, -2.1010e-02, -6.4279e-03, 7.7135e-03, 4.1270e-02, 0.0, 0.0,
-          -1.0101e-02, -6.3492e-03, -2.2222e-03, 2.5397e-03, 1.0101e-02, 3.1746e-02]
+alphaJ = [-5.7143e-02, -2.1010e-02, -6.4279e-03, 7.7135e-03, 4.1270e-02, 0.0, 
+          0.0, -1.0101e-02, -6.3492e-03, -2.2222e-03, 2.5397e-03, 1.0101e-02, 
+          3.1746e-02]
 #Fourth-degree Stevens factors for 3+ f-electrons
 betaJ = [6.3492e-03, -7.3462e-04, -2.9111e-04, 4.0755e-04, 2.5012e-03, 0.0, 0.0,
-         1.2244e-04, -5.9200e-05, -3.3300e-05, 4.4400e-05, 1.6325e-04, -1.7316e-03]
+         1.2244e-04, -5.9200e-05, -3.3300e-05, 4.4400e-05, 1.6325e-04, 
+         -1.7316e-03]
 #Sixth-degree Stevens factors for 3+ f-electrons
 gammaJ = [0.0, 6.0994e-05, -3.7988e-05, 6.6859e-04, 0.0, 0.0, 0.0, -1.1212e-06,
           1.0350e-06, -1.2937e-06, 2.0699e-06, -5.6061e-06, 1.4800e-04]
@@ -55,9 +58,9 @@ class CF(object):
        Class defining the trivalent rare earth compound and its crystal field
        parameters
        
-       There is only one basic object in CFlib, defining the trivalent rare earth,
-       its crystal field parameters, and, if already diagonalized, the eigenvalues
-       and eigenfunctions of the CF Hamiltonian.  
+       There is only one basic object in CFlib, defining the trivalent rare 
+       earth, its crystal field parameters, and, if already diagonalized, the 
+       eigenvalues and eigenfunctions of the CF Hamiltonian.  
     """
 
     def __init__(self, RE=None, title=None, parfile=None):
@@ -102,8 +105,10 @@ class CF(object):
         self.mux = 0.0
 
     def __str__(self):
-        """Print the rare earth, CF parameters, and, if diagonalized, 
-           the eigenvalues and eigenvectors."""
+        """Print the model parameters
+        
+           This includes the rare earth, the CF parameters, and, if 
+           diagonalized, the eigenvalues and eigenvectors."""
 
         if self.title:
             output = [self.title]
@@ -146,7 +151,8 @@ class CF(object):
                             operator = "-"
                         else:
                             operator = "+"
-                        line.append("%s%7.4f|%g>" % (operator, abs(self.EF[j, i]), Jz))
+                        line.append("%s%7.4f|%g>" % 
+                                    (operator, abs(self.EF[j, i]), Jz))
                 output.append(" ".join(line))
 
         if self.peaks:
@@ -279,22 +285,24 @@ class CF(object):
 
         for m in range(self.size):
             mJ = m - J
-            O20 = 3 * mJ ** 2 - J * (J + 1)
-            O40 = 35 * mJ ** 4 - 30 * J * (J + 1) * mJ ** 2 + 25 * mJ ** 2 - 6 * J * (J + 1) + 3 * (J * (J + 1)) ** 2
-            O60 = 231 * mJ ** 6 - 315 * J * (J + 1) * mJ ** 4 + 735 * mJ ** 4 + 105 * (J * (J + 1) * mJ) ** 2 \
-                  - 525 * J * (J + 1) * mJ ** 2 + 294 * mJ ** 2 - 5 * (J * (J + 1)) ** 3 + 40 * (J * (J + 1)) ** 2 - 60 * J * (J + 1)
-            H[m, m] += self.B20 * O20 + self.B40 * O40 + self.B60 * O60
+            O20 = 3*mJ**2 - J*(J+1)
+            O40 = (35*mJ**4 - 30*J*(J+1)*mJ**2 + 
+                   25*mJ**2 - 6*J*(J+1) + 3*(J*(J+1))**2)
+            O60 = (231*mJ**6 - 315*J*(J+1)*mJ**4 + 735*mJ**4 + 
+                   105*(J*(J+1)*mJ)**2 - 525*J*(J+1)*mJ**2 + 294*mJ**2 - 
+                   5*(J*(J+1))**3 + 40*(J*(J+1))**2 - 60*J*(J+1))
+            H[m, m] += self.B20*O20 + self.B40*O40 + self.B60*O60
 
-        for m in range(self.size - 2):
+        for m in range(self.size-2):
             mJ = m - J
             n = m + 2
             nJ = mJ + 2
-            O22 = 0.5 * np.sqrt((J * (J + 1) - nJ * (nJ - 1)) * (J * (J + 1) - (nJ - 1) * (nJ - 2)))
-            O42 = (3.5 * (mJ ** 2 + nJ ** 2) - J * (J + 1) - 5) * O22
-            O62 = (16.5 * (mJ ** 4 + nJ ** 4) - 9 * (mJ ** 2 + nJ ** 2) * J * (J + 1) - 61.5 * (mJ ** 2 + nJ ** 2)
-                   + (J * (J + 1)) ** 2 + 10 * J * (J + 1) + 102) * O22
-            H[m, n] += self.B22 * O22 + self.B42 * O42 + self.B62 * O62
-            H[n, m] = H[m, n]
+            O22 = 0.5*np.sqrt((J*(J+1) - nJ*(nJ-1))*(J*(J+1) - (nJ-1)*(nJ-2)))
+            O42 = (3.5*(mJ**2+nJ**2) - J*(J+1) - 5) * O22
+            O62 = (16.5*(mJ**4+nJ**4) - 9*(mJ**2+nJ**2)*J*(J+1) - 
+                   61.5*(mJ**2+nJ**2) + (J*(J+1))**2 + 10*J*(J+1) + 102) * O22
+            H[m,n] += self.B22*O22 + self.B42*O42 + self.B62*O62
+            H[n,m] = H[m,n]
 
         for m in range(self.size - 3):
             mJ = m - J
@@ -302,11 +310,12 @@ class CF(object):
             nJ = mJ + 3
             A = 1.0
             for k in range(3):
-                A *= J * (J + 1) - (nJ - k) * (nJ - k - 1)
-            O43 = 0.25 * np.sqrt(A) * (mJ + nJ)
-            O63 = 0.25 * (11 * (mJ ** 3 + nJ ** 3) - 3 * (mJ + nJ) * J * (J + 1) - 59 * (mJ + nJ)) * np.sqrt(A)
-            H[m, n] += self.B43 * O43 + self.B63 * O63
-            H[n, m] = H[m, n]
+                A *= J*(J+1) - (nJ-k)*(nJ-k-1)
+            O43 = 0.25*np.sqrt(A)*(mJ + nJ)
+            O63 = (0.25*(11*(mJ**3+nJ**3) - 3*(mJ+nJ)*J*(J+1) - 59*(mJ+nJ)) * 
+                   np.sqrt(A))
+            H[m,n] += self.B43*O43 + self.B63*O63
+            H[n,m] = H[m,n]
 
         for m in range(self.size - 4):
             mJ = m - J
@@ -314,11 +323,11 @@ class CF(object):
             nJ = mJ + 4
             O44 = 1.0
             for k in range(4):
-                O44 *= J * (J + 1) - (nJ - k) * (nJ - k - 1)
-            O44 = 0.5 * np.sqrt(O44)
-            O64 = (5.5 * (mJ ** 2 + nJ ** 2) - J * (J + 1) - 38) * O44
-            H[m, n] += self.B44 * O44 + self.B64 * O64
-            H[n, m] = H[m, n]
+                O44 *= J*(J+1) - (nJ - k)*(nJ - k - 1)
+            O44 = 0.5*np.sqrt(O44)
+            O64 = (5.5*(mJ**2 + nJ**2) - J*(J+1) - 38)*O44
+            H[m,n] += self.B44*O44 + self.B64*O64
+            H[n,m] = H[m,n]
 
         for m in range(self.size - 6):
             mJ = m - J
@@ -326,10 +335,10 @@ class CF(object):
             nJ = mJ + 6
             O66 = 1.0
             for k in range(6):
-                O66 *= J * (J + 1) - (nJ - k) * (nJ - k - 1)
-            O66 = 0.5 * np.sqrt(O66)
-            H[m, n] += self.B66 * O66
-            H[n, m] = H[m, n]
+                O66 *= J*(J+1) - (nJ - k)*(nJ - k - 1)
+            O66 = 0.5*np.sqrt(O66)
+            H[m,n] += self.B66*O66
+            H[n,m] = H[m,n]
 
         return H
 
@@ -341,24 +350,24 @@ class CF(object):
 
         for m in range(self.size):
             mJ = m - J
-            H[m, m] -= self.Hz * mJ
+            H[m, m] -= self.Hz*mJ
 
         for m in range(self.size - 1):
             mJ = m - J
             n = m + 1
             nJ = mJ + 1
-            H[m, n] -= 0.5 * self.Hx * np.sqrt((J * (J + 1) - mJ * nJ))
-            H[n, m] = H[m, n]
+            H[m,n] -= 0.5*self.Hx*np.sqrt((J*(J+1)-mJ*nJ))
+            H[n,m] = H[m,n]
 
         return H
 
     def Ham(self):
         """Returns the total Hamiltonian including CF and Zeeman terms."""
 
-        return self.CFham() + self.MFham()
+        return (self.CFham() + self.MFham())
 
     def EFS(self):
-        """Determine the eigenvalues and eigenfunctions of the total Hamiltonian."""
+        """Calculate eigenvalues and eigenfunctions of the total Hamiltonian."""
 
         H = self.Ham()
         self.EV, self.EF = eigh(H)
@@ -376,20 +385,23 @@ class CF(object):
             for n in range(self.size):
                 for k in range(self.size):
                     kJ = k - J
-                    self.Jz[m, n] += self.EF[k, m] * self.EF[k, n] * kJ
+                    self.Jz[m,n] += self.EF[k, m]*self.EF[k,n]*kJ
                 for k in range(self.size - 1):
                     kJ = k - J
                     l = k + 1
                     lJ = l - J
-                    self.Jp[m, n] = self.Jp[m, n] + \
-                                    self.EF[l, m] * self.EF[k, n] * np.sqrt(J * (J + 1) - kJ * lJ)
+                    self.Jp[m,n] = (self.Jp[m,n] + 
+                                    self.EF[l,m]*self.EF[k,n] *
+                                    np.sqrt(J*(J+1)-kJ*lJ))
                 for k in range(1, self.size):
                     kJ = k - J
                     l = k - 1
                     lJ = l - J
-                    self.Jm[m, n] = self.Jm[m, n] + \
-                                    self.EF[l, m] * self.EF[k, n] * np.sqrt(J * (J + 1) - kJ * lJ)
-                self.TP[m, n] = (2 * self.Jz[m, n] ** 2 + self.Jp[m, n] ** 2 + self.Jm[m, n] ** 2) / 3
+                    self.Jm[m,n] = (self.Jm[m,n] + 
+                                    self.EF[l,m]*self.EF[k,n] *
+                                    np.sqrt(J*(J+1)-kJ*lJ))
+                self.TP[m,n] = (
+                    (2*self.Jz[m,n]**2+self.Jp[m,n]**2+self.Jm[m,n]**2) / 3)
 
     def get_peaks(self, T=None, Hx=None, Hz=None):
         """Determine the peak intensities from the total Hamiltonian."""
@@ -410,14 +422,14 @@ class CF(object):
         if kT <= 0.0:
             BF[0] = 1.0
         else:
-            Z = sum(np.exp(-self.EV / kT))
-            BF = np.exp(-self.EV / kT) / Z
+            Z = sum(np.exp(-self.EV/kT))
+            BF = np.exp(-self.EV/kT) / Z
 
         peaks = []
         for n in range(self.size):
             for m in range(self.size):
                 ET = self.EV[m] - self.EV[n]
-                IT = self.TP[m, n] * BF[n]
+                IT = self.TP[m,n]*BF[n]
                 if IT > 0.0:
                     peaks.append((ET, IT))
 
@@ -425,13 +437,13 @@ class CF(object):
         for k in range(len(peaks)):
             ETk, ITk = peaks[k]
             if ITk > 0.0:
-                sum_peaks = ETk * ITk
+                sum_peaks = ETk*ITk
                 for l in range(len(peaks)):
                     if k != l:
                         ETl, ITl = peaks[l]
                         if ITl > 0.0 and abs(ETk - ETl) < self.resolution:
                             ITk = ITk + ITl
-                            sum_peaks = sum_peaks + ETl * ITl
+                            sum_peaks = sum_peaks + ETl*ITl
                             peaks[l] = (ETl, 0.0)
                 if ITk > self.threshold:
                     ETk = sum_peaks / ITk
@@ -455,15 +467,16 @@ class CF(object):
         peaks = self.get_peaks(T, Hx, Hz)
 
         if eps is None: 
-            eps = np.linspace(-1.1 * self.EV[-1], 1.1 * self.EV[-1], 501)
+            eps = np.linspace(-1.1*self.EV[-1], 1.1*self.EV[-1], 501)
         if sigma is None: 
-            sigma = 0.01 * (max(eps) - min(eps))
+            sigma = 0.01*(max(eps) - min(eps))
 
         S = np.zeros(eps.size, dtype='float64')
 
         for EV, IT in peaks:
-            S += IT * np.exp(-(eps - EV) ** 2 / (2 * sigma ** 2)) / (sigma * np.sqrt(2 * np.pi))
-        S *= 72.65 * self.gJ ** 2
+            S += (IT*(np.exp(-(eps-EV)**2 / (2*sigma**2)) /
+                      (sigma*np.sqrt(2*np.pi))))
+        S *= 72.65*self.gJ**2
 
         return S
 
@@ -493,21 +506,23 @@ class CF(object):
         if kT > 0.0:
             Jz_exp = 0.0
             Jx_exp = 0.0
-            Z = sum(np.exp(-self.EV / kT))
+            Z = sum(np.exp(-self.EV/kT))
             for i in range(self.EV.size):
-                Jz_exp = Jz_exp + self.Jz[i, i] * np.exp(-self.EV[i] / kT)
-                Jx_exp += 0.5 * (self.Jp[i, i] + self.Jm[i, i]) * np.exp(-self.EV[i] / kT)
+                Jz_exp = Jz_exp + self.Jz[i,i]*np.exp(-self.EV[i]/kT)
+                Jx_exp += (0.5*(self.Jp[i,i] + self.Jm[i,i]) *
+                           np.exp(-self.EV[i]/kT))
             Jz_exp = Jz_exp / Z
             Jx_exp = Jx_exp / Z
         else:
-            Jz_exp = sum(self.Jz[self.EV == 0.0, self.EV == 0.0]) / self.EV[self.EV == 0.0].size
-            Jx_exp = sum(0.5 * (self.Jp[self.EV == 0.0, self.EV == 0.0]
-                                + self.Jm[self.EV == 0.0, self.EV == 0.0])) \
-                     / self.EV[self.EV == 0.0].size
+            Jz_exp = (sum(self.Jz[self.EV==0.0, self.EV==0.0]) / 
+                      self.EV[self.EV==0.0].size)
+            Jx_exp = (sum(0.5*(self.Jp[self.EV==0.0, self.EV==0.0] +
+                               self.Jm[self.EV==0.0, self.EV==0.0])) /
+                      self.EV[self.EV==0.0].size)
         self.Jz_exp = Jz_exp
-        self.muz = self.gJ * self.Jz_exp
+        self.muz = self.gJ*self.Jz_exp
         self.Jx_exp = Jx_exp
-        self.mux = self.gJ * self.Jx_exp
+        self.mux = self.gJ*self.Jx_exp
 
         return self.Jx_exp, self.Jz_exp, self.mux, self.muz
 
@@ -517,26 +532,27 @@ class CF(object):
         if T is None:
             T = np.linspace(1.0, 300.0, 300)
         kT = T / 11.6045
-        Z = sum(np.exp(-self.EV / kT))
-        ChiC_zz = 0.0 * T
-        ChiC_xx = 0.0 * T
-        ChiV_zz = 0.0 * T
-        ChiV_xx = 0.0 * T
+        Z = sum(np.exp(-self.EV/kT))
+        ChiC_zz = 0.0*T
+        ChiC_xx = 0.0*T
+        ChiV_zz = 0.0*T
+        ChiV_xx = 0.0*T
         for m in range(self.EV.size):
             for n in range(self.EV.size):
-                if all(abs(self.EV[n] - self.EV[m]) < 0.00001 * kT):
-                    ChiC_zz += self.Jz[m, n] ** 2 * np.exp(-self.EV[m] / kT)
-                    ChiC_xx += 0.25 * (self.Jp[m, n] ** 2 + self.Jm[m, n] ** 2) \
-                               * np.exp(-self.EV[m] / kT)
+                if all(abs(self.EV[n] - self.EV[m]) < 0.00001*kT):
+                    ChiC_zz += self.Jz[m,n]**2*np.exp(-self.EV[m]/kT)
+                    ChiC_xx += (0.25*(self.Jp[m,n]**2 + self.Jm[m,n]**2) *
+                                np.exp(-self.EV[m]/kT))
                 else:
-                    ChiV_zz += 2 * self.Jz[m, n] ** 2 * np.exp(-self.EV[m] / kT) \
-                               / (self.EV[n] - self.EV[m])
-                    ChiV_xx += 0.5 * (self.Jp[m, n] ** 2 + self.Jm[m, n] ** 2) \
-                               * np.exp(-self.EV[m] / kT) / (self.EV[n] - self.EV[m])
-        ChiC_zz = self.gJ ** 2 * ChiC_zz / (kT * Z)
-        ChiC_xx = self.gJ ** 2 * ChiC_xx / (kT * Z)
-        ChiV_zz = self.gJ ** 2 * ChiV_zz / Z
-        ChiV_xx = self.gJ ** 2 * ChiV_xx / Z
+                    ChiV_zz += (2*self.Jz[m,n]**2*np.exp(-self.EV[m]/kT) /
+                                (self.EV[n] - self.EV[m]))
+                    ChiV_xx += (0.5*(self.Jp[m,n]**2 + self.Jm[m,n]**2) *
+                                np.exp(-self.EV[m]/kT) / 
+                                (self.EV[n]-self.EV[m]))
+        ChiC_zz = self.gJ**2*ChiC_zz / (kT*Z)
+        ChiC_xx = self.gJ**2*ChiC_xx / (kT*Z)
+        ChiV_zz = self.gJ**2*ChiV_zz / Z
+        ChiV_xx = self.gJ**2*ChiV_xx / Z
 
         return ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx
 
@@ -552,7 +568,7 @@ class CF(object):
         temperature = NXfield(T, name="temperature")
         temperature.units = "K"
 
-        chi = NXfield(ChiC_zz + ChiV_zz + 2 * (ChiC_xx + ChiV_xx), name="chi")
+        chi = NXfield(ChiC_zz + ChiV_zz + 2*(ChiC_xx + ChiV_xx), name="chi")
 
         entry.chi = NXdata(chi, temperature)
         entry.chi.title = "Susceptibility of %s" % self.title
