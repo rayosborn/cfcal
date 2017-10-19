@@ -63,7 +63,7 @@ class CF(object):
        eigenvalues and eigenfunctions of the CF Hamiltonian.  
     """
 
-    def __init__(self, RE=None, title=None, parfile=None):
+    def __init__(self, RE=None, name=None, parfile=None):
         """Initializes the CF object or read it from a file."""
 
         if parfile:
@@ -86,7 +86,7 @@ class CF(object):
             self.B66 = 0.0
             self.Hz = 0.0
             self.Hx = 0.0
-            self.title = title
+            self.name = name
         self.H = np.matrix(np.zeros((self.size, self.size), dtype='float64'))
         self.Jz = np.zeros((self.size, self.size), dtype='float64')
         self.Jp = np.zeros((self.size, self.size), dtype='float64')
@@ -110,8 +110,8 @@ class CF(object):
            This includes the rare earth, the CF parameters, and, if 
            diagonalized, the eigenvalues and eigenvectors."""
 
-        if self.title:
-            output = [self.title]
+        if self.name:
+            output = [self.name]
         else:
             output = []
         output.append("%s: Nf = %s, J = %s" % (self.RE, self.Nf, self.J))
@@ -172,7 +172,7 @@ class CF(object):
         parser.optionxform = str
 
         parser.add_section('material')        
-        parser.set('material', 'title', str(self.title))
+        parser.set('material', 'name', str(self.name))
         parser.set('material', 'RE', str(self.RE))
         
         parser.add_section('parameters')        
@@ -191,7 +191,7 @@ class CF(object):
         parser.set('parameters', 'Hx', str(self.Hx))
 
         if parfile is None:
-            parfile = '%s.cfg' % self.title
+            parfile = '%s.cfg' % self.name
         with open(parfile, 'wb') as cfg:
             parser.write(cfg)
 
@@ -201,7 +201,7 @@ class CF(object):
         parser = SafeConfigParser()
         parser.read(parfile)
         
-        self.title = parser.get('material', 'title')
+        self.name = parser.get('material', 'name')
         self.RE = parser.get('material', 'RE')
         
         self.B20 = parser.getfloat('parameters', 'B20')
@@ -417,7 +417,8 @@ class CF(object):
 
         BF = np.zeros(self.size, dtype='float64')
 
-        if T is None: T = self.T
+        if T is None: 
+            T = self.T
         kT = T / 11.6045
         if kT <= 0.0:
             BF[0] = 1.0
@@ -485,9 +486,12 @@ class CF(object):
 
         from nexusformat.nexus import NXfield, NXentry, NXsample, NXdata
 
+        if T is None:
+            T = self.T
+
         S = self.spectrum(eps, sigma, T, Hx, Hz)
         entry = NXentry()
-        entry.title = "Crystal Field Spectra for %s at %s K" % (self.title, T)
+        entry.title = "Crystal Field Spectra for %s at %s K" % (self.name, T)
         entry.sample = NXsample()
         entry.sample.temperature = T
         entry.sample.temperature.units = "K"
@@ -527,57 +531,86 @@ class CF(object):
         return self.Jx_exp, self.Jz_exp, self.mux, self.muz
 
     def chi(self, T=None):
-        """Calculate the susceptibility at the specified temperatures."""
+        """Calculate the susceptibility at a specified temperature."""
 
         if T is None:
-            T = np.linspace(1.0, 300.0, 300)
+            T = self.T
+
         kT = T / 11.6045
-        Z = sum(np.exp(-self.EV/kT))
-        ChiC_zz = 0.0*T
-        ChiC_xx = 0.0*T
-        ChiV_zz = 0.0*T
-        ChiV_xx = 0.0*T
+        Z = sum(np.exp(-self.EV/kT)) 
+
+        ChiC_zz = 0.0 * T
+        ChiC_xx = 0.0 * T
+        ChiV_zz = 0.0 * T
+        ChiV_xx = 0.0 * T
         for m in range(self.EV.size):
             for n in range(self.EV.size):
-                if all(abs(self.EV[n] - self.EV[m]) < 0.00001*kT):
-                    ChiC_zz += self.Jz[m,n]**2*np.exp(-self.EV[m]/kT)
-                    ChiC_xx += (0.25*(self.Jp[m,n]**2 + self.Jm[m,n]**2) *
-                                np.exp(-self.EV[m]/kT))
+                if abs(self.EV[n] - self.EV[m]) < 0.00001 * kT:
+                    ChiC_zz += self.Jz[m,n]**2 * np.exp(-self.EV[m] / kT)
+                    ChiC_xx += 0.25 * (self.Jp[m,n]**2 + self.Jm[m,n]**2) \
+                               * np.exp(-self.EV[m]/kT)
                 else:
-                    ChiV_zz += (2*self.Jz[m,n]**2*np.exp(-self.EV[m]/kT) /
-                                (self.EV[n] - self.EV[m]))
-                    ChiV_xx += (0.5*(self.Jp[m,n]**2 + self.Jm[m,n]**2) *
-                                np.exp(-self.EV[m]/kT) / 
-                                (self.EV[n]-self.EV[m]))
-        ChiC_zz = self.gJ**2*ChiC_zz / (kT*Z)
-        ChiC_xx = self.gJ**2*ChiC_xx / (kT*Z)
-        ChiV_zz = self.gJ**2*ChiV_zz / Z
-        ChiV_xx = self.gJ**2*ChiV_xx / Z
+                    ChiV_zz += 2 * self.Jz[m,n]**2 * np.exp(-self.EV[m] / kT) \
+                               / (self.EV[n] - self.EV[m])
+                    ChiV_xx += 0.5 * (self.Jp[m,n]**2 + self.Jm[m,n]**2) \
+                               * np.exp(-self.EV[m]/kT)/(self.EV[n]-self.EV[m])
+        ChiC_zz = self.gJ**2 * ChiC_zz / (kT * Z)
+        ChiC_xx = self.gJ**2 * ChiC_xx / (kT * Z)
+        ChiV_zz = self.gJ**2 * ChiV_zz / Z
+        ChiV_xx = self.gJ**2 * ChiV_xx / Z
 
         return ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx
 
-    def NXchi(self, T=None):
+    def chis(self, Ts=None):
+
+        if Ts is None:
+            Ts = np.linspace(1.0, 300.0, 300, dtype=np.float32)
+
+        self.EFS()
+        self.TPS()
+
+        if Ts is None:
+            Ts = np.linspace(1.0, 300.0, 300, dtype=np.float32)
+
+        ChiC_zz = np.zeros(shape=Ts.shape, dtype=np.float32)
+        ChiC_xx = np.zeros(shape=Ts.shape, dtype=np.float32)
+        ChiV_zz = np.zeros(shape=Ts.shape, dtype=np.float32)
+        ChiV_xx = np.zeros(shape=Ts.shape, dtype=np.float32)
+
+        for i, T in enumerate(Ts):
+            ChiC_zz[i], ChiC_xx[i], ChiV_zz[i], ChiV_xx[i] = self.chi(T)
+
+        return ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx
+
+
+    def NXchi(self, Ts=None):
         """Returns the susceptibility as a NeXus NXentry"""
 
         from nexusformat.nexus import NXfield, NXentry, NXdata
 
-        ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx = self.chi(T)
+        if Ts is None:
+            Ts = np.linspace(1.0, 300.0, 300, dtype=np.float32)
 
         entry = NXentry()
-        entry.title = self.title
-        temperature = NXfield(T, name="temperature")
+        entry.title = "Susceptibility of %s" % self.name
+        temperature = NXfield(Ts, name="temperature")
         temperature.units = "K"
 
+        ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx = self.chis(Ts)
+
         chi = NXfield(ChiC_zz + ChiV_zz + 2*(ChiC_xx + ChiV_xx), name="chi")
+        invchi = NXfield(1/chi, name='invchi')
+        chiz = NXfield(ChiC_zz+ChiV_zz, name='chiz')
+        chix = NXfield(ChiC_xx+ChiV_xx, name='chix')
 
         entry.chi = NXdata(chi, temperature)
-        entry.chi.title = "Susceptibility of %s" % self.title
-        entry.invchi = NXdata(1 / chi, temperature)
-        entry.invchi.title = "Inverse Susceptibility of %s" % self.title
-        entry.chiz = NXdata(ChiC_zz + ChiV_zz, temperature)
-        entry.chiz.title = "Susceptibility of %s (z-axis)" % self.title
-        entry.chix = NXdata(ChiC_xx + ChiV_xx, temperature)
-        entry.chix.title = "Susceptibility of %s (x-axis)" % self.title
+        entry.chi.title = "Susceptibility of %s" % self.name
+        entry.invchi = NXdata(invchi, temperature)
+        entry.invchi.title = "Inverse Susceptibility of %s" % self.name
+        entry.chiz = NXdata(chiz, temperature)
+        entry.chiz.title = "Susceptibility of %s (z-axis)" % self.name
+        entry.chix = NXdata(chix, temperature)
+        entry.chix.title = "Susceptibility of %s (x-axis)" % self.name
 
         return entry
 
