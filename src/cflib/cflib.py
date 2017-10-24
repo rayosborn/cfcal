@@ -198,6 +198,10 @@ class CF(object):
     def load(self, parfile):
         """Load a saved version of the current object."""
 
+        if not os.path.exists(parfile):
+            raise OSError("'%s' does not exist" % 
+                          os.path.realpath(parfile))
+
         parser = SafeConfigParser()
         parser.read(parfile)
         
