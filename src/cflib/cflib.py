@@ -22,7 +22,8 @@ CFlib: Python calculator for crystal fields
 Crystal Field calculations using the Stevens Operator formalism.
 """
 
-from ConfigParser import SafeConfigParser
+import os
+from configparser import SafeConfigParser
 import numpy as np
 from scipy.linalg import eigh
 
