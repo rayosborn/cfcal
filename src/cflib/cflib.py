@@ -463,7 +463,8 @@ class CF(object):
 
         return self.peaks
 
-    def spectrum(self, eps=None, sigma=None, T=None, Hx=None, Hz=None):
+    def spectrum(self, eps=None, sigma=None, gamma=None, T=None, 
+                 Hx=None, Hz=None):
         """Calculates the neutron scattering cross section.
         """
 
@@ -474,19 +475,25 @@ class CF(object):
 
         if eps is None: 
             eps = np.linspace(-1.1*self.EV[-1], 1.1*self.EV[-1], 501)
-        if sigma is None: 
+        if sigma is None and gamma is None: 
             sigma = 0.01*(max(eps) - min(eps))
 
         S = np.zeros(eps.size, dtype='float64')
 
         for EV, IT in peaks:
-            S += (IT*(np.exp(-(eps-EV)**2 / (2*sigma**2)) /
-                      (sigma*np.sqrt(2*np.pi))))
+            if sigma is not None and gamma is None:
+                S += IT * gauss(eps, EV, sigma)
+            elif sigma is None and gamma is not None:
+                S += IT * lorentz(eps, EV, gamma)
+            else:
+                S += IT * pseudovoigt(eps, EV, sigma, gamma)
+
         S *= 72.65*self.gJ**2
 
         return S
 
-    def NXspectrum(self, eps=None, sigma=None, T=None, Hx=None, Hz=None):
+    def NXspectrum(self, eps=None, sigma=None, gamma=None, T=None, 
+                   Hx=None, Hz=None):
         """Returns the neutron scattering cross section as a NXentry group"""
 
         from nexusformat.nexus import NXfield, NXentry, NXsample, NXdata
@@ -494,7 +501,7 @@ class CF(object):
         if T is None:
             T = self.T
 
-        S = self.spectrum(eps, sigma, T, Hx, Hz)
+        S = self.spectrum(eps, sigma, gamma, T, Hx, Hz)
         entry = NXentry()
         entry.title = "Crystal Field Spectra for %s at %s K" % (self.name, T)
         entry.sample = NXsample()
@@ -619,3 +626,25 @@ class CF(object):
 
         return entry
 
+integral_factor = np.sqrt(2*np.pi)
+sigma_factor = 2 * np.sqrt(2*np.log(2))
+
+def gauss(x, center, sigma):
+    return np.exp(-(x-center)**2/(2*sigma**2)) / (sigma * integral_factor)
+
+def lorentz(x, center, gamma):
+    return (gamma / np.pi) / ((x - center) ** 2 + gamma ** 2)
+
+def pseudovoigt(x, center, sigma, gamma):
+    GammaG = sigma_factor * sigma
+    GammaL = 2 * gamma
+    FWHM = (GammaG**5 + 
+            2.69269 * GammaG**4 * GammaL + 
+            2.42843 * GammaG**3 * GammaL**2 + 
+            4.47163 * GammaG**2 + GammaL**3 +
+            0.07842 * GammaG**4 * GammaL +
+            GammaL**5)**(0.2)
+    ratio = GammaL / FWHM
+    fraction = 1.36603 * ratio - 0.47719 * ratio**2 + 0.11116 * ratio**3
+    return ((1-fraction) * gauss(x, center, sigma) + 
+            fraction * lorentz(x, center, gamma))
