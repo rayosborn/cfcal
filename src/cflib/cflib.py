@@ -23,7 +23,10 @@ Crystal Field calculations using the Stevens Operator formalism.
 """
 
 import os
-from configparser import SafeConfigParser
+try:
+    from configparser import SafeConfigParser
+except ImportError:
+    from ConfigParser import SafeConfigParser
 import numpy as np
 from scipy.linalg import eigh
 
@@ -106,10 +109,12 @@ class CF(object):
         self.mux = 0.0
 
     def __str__(self):
-        """Print the model parameters
+        """
+        Return a summary of the model parameters
         
-           This includes the rare earth, the CF parameters, and, if 
-           diagonalized, the eigenvalues and eigenvectors."""
+        This includes the rare earth, the CF parameters, and, if 
+        diagonalized, the eigenvalues and eigenvectors.
+        """
 
         if self.name:
             output = [self.name]
