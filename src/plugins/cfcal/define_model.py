@@ -3,7 +3,7 @@ from nexpy.gui.datadialogs import BaseDialog, GridParameters
 from nexpy.gui.plotview import plotview
 from nexpy.gui.utils import report_error
 from nexusformat.nexus import *
-from cflib.cflib import CF
+from cfcal.cfcal import CF
 
 def show_dialog(parent=None):
     try:
@@ -121,83 +121,3 @@ class DefineModelDialog(BaseDialog):
             self.unitcell_alpha_checkbox.setCheckState(QtCore.Qt.Unchecked)
             self.unitcell_gamma_checkbox.setCheckState(QtCore.Qt.Unchecked)
 
-    def guess_symmetry(self):
-        self.refine.a, self.refine.b, self.refine.c, \
-            self.refine.alpha, self.refine.beta, self.refine.gamma = self.get_lattice_parameters()
-        return self.refine.guess_symmetry()
-
-    def get_lattice_parameters(self):
-        return (np.float32(self.unitcell_a_box.text()),
-                np.float32(self.unitcell_b_box.text()),
-                np.float32(self.unitcell_c_box.text()),
-                np.float32(self.unitcell_alpha_box.text()),
-                np.float32(self.unitcell_beta_box.text()),
-                np.float32(self.unitcell_gamma_box.text()))
-
-    def get_wavelength(self):
-        return np.float32(self.wavelength_box.text())
-
-    def get_distance(self):
-        return np.float32(self.distance_box.text())
-
-    def get_tilts(self):
-        return (np.float32(self.yaw_box.text()),
-                np.float32(self.pitch_box.text()),
-                np.float32(self.roll_box.text()))
-
-    def get_centers(self):
-        return np.float32(self.xc_box.text()), np.float32(self.yc_box.text())
-
-    def get_polar_max(self):
-        return np.float32(self.polar_box.text())
-
-    def set_polar_max(self):
-        self.refine.set_polar_max(self.get_polar_max())
-
-    def initialize_fit(self):
-        self.refine.parameters = []
-        if self.unitcell_a_checkbox.isChecked():
-            self.refine.parameters.append({'a':self.refine.a})
-        if self.unitcell_b_checkbox.isChecked():
-            self.refine.parameters.append({'b':self.refine.b})
-        if self.unitcell_c_checkbox.isChecked():
-            self.refine.parameters.append({'c':self.refine.c})
-        if self.unitcell_alpha_checkbox.isChecked():
-            self.refine.parameters.append({'alpha':self.refine.alpha})
-        if self.unitcell_beta_checkbox.isChecked():
-            self.refine.parameters.append({'beta':self.refine.beta})
-        if self.unitcell_gamma_checkbox.isChecked():
-            self.refine.parameters.append({'gamma':self.refine.gamma})
-        if self.wavelength_checkbox.isChecked():
-            self.refine.parameters.append({'wavelength':self.refine.wavelength})
-        if self.distance_checkbox.isChecked():
-            self.refine.parameters.append({'distance':self.refine.distance})
-        if self.yaw_checkbox.isChecked():
-            self.refine.parameters.append({'yaw':self.refine.yaw})
-        if self.pitch_checkbox.isChecked():
-            self.refine.parameters.append({'pitch':self.refine.pitch})
-        if self.roll_checkbox.isChecked():
-            self.refine.parameters.append({'roll':self.refine.roll})
-        if self.xc_checkbox.isChecked():
-            self.refine.parameters.append({'xc':self.refine.xc})
-        if self.yc_checkbox.isChecked():
-            self.refine.parameters.append({'yc':self.refine.yc})
-
-    def plot_peaks(self):
-        self.refine.polar_max = self.get_polar_max()
-        self.refine.plot_peaks(self.refine.x, self.refine.y)
-        self.refine.plot_rings()
-
-    def refine_parameters(self):
-        self.initialize_fit()
-        self.refine.refine_parameters()
-        self.update_parameters()
-
-    def write_parameters(self):
-        try:
-            polar_angles, azimuthal_angles = self.refine.calculate_angles(
-                                                 self.refine.xp, self.refine.yp)
-            self.refine.write_angles(polar_angles, azimuthal_angles)
-            self.refine.write_parameters()
-        except NeXusError as error:
-            report_error('Refining Lattice', error)
