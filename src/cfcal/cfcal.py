@@ -1,6 +1,6 @@
-# CFlib  - Crystal Field Module
+# CFcal  - Crystal Field Module
 #
-# Copyright (C) 2008-2015 R. Osborn, E. A. Goremychkin
+# Copyright (C) 2008-2017 R. Osborn, E. A. Goremychkin
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,7 +17,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 """
-CFlib: Python calculator for crystal fields
+CFcal: Python calculator for crystal fields
 
 Crystal Field calculations using the Stevens Operator formalism.
 """

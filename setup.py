@@ -10,13 +10,13 @@ with open('DESCRIPTION.rst') as f:
     long_description = f.read()
 
 setup(
-    name="CFlib",
+    name="CFcal",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="Python calculator for crystal fields",
     long_description=long_description,
 
-    url='http://github.com/rayosborn/CFlib',
+    url='http://github.com/rayosborn/cfcal',
 
     author='Ray Osborn',
     author_email='rayosborn@mac.com',
@@ -27,7 +27,6 @@ setup(
         'Development Status :: 4 - Beta',
         'Topic :: Scientific/Engineering',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -38,7 +37,7 @@ setup(
     package_dir = {'': 'src'},
     packages=find_packages('src'),
     package_data={
-        'CFlib': ['*.db'],
+        'cfcal': ['*.ini'],
     },
 
 #    entry_points={

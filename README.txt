@@ -1,4 +1,4 @@
-CFlib: Python calculator for crystal fields
+CFcal: Python calculator for crystal fields
 ===========================================
 This is a Python package for performing calculations of crystal field (CF) 
 properties of rare earth ions using the Stevens Operator formalism [K. W. H. 

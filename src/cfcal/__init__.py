@@ -1,4 +1,4 @@
-__package_name__ = u'CFlib'
+__package_name__ = u'CFcal'
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
@@ -11,7 +11,7 @@ __author_name__ = u'Ray Osborn'
 __author_email__ = u'rayosborn@mac.com'
 __author__ = __author_name__ + u' <' + __author_email__ + u'>'
 
-__description__ = u'CFlib: Python calculator for crystal fields'
+__description__ = u'CFcal: Python calculator for crystal fields'
 __long_description__ = \
 u"""
 This is a Python package for performing calculations of crystal field (CF) 

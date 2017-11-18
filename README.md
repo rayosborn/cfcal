@@ -1,6 +1,6 @@
 Introduction
 ============
-CFlib is a Python package for performing calculations of crystal field (CF) 
+CFcal is a Python package for performing calculations of crystal field (CF) 
 properties of rare earth ions using the Stevens Operator formalism [K. W. H. 
 Stevens, Proc. Phys. Soc. A **65**, 209 (1952)]. Once the CF parameters have 
 been initialized, the CF Hamiltonian can be diagonalized to determine the 
@@ -10,10 +10,10 @@ temperature.
 
 Installing and Running
 ======================
-The latest version of CFlib can be downloaded from the CFlib [Git 
-repository](https://github.com/rayosborn/cflib).
+The latest version of CFcal can be downloaded from the CFcal [Git 
+repository](https://github.com/rayosborn/cfcal).
 
-From within the main directory, you can install CFlib using:
+From within the main directory, you can install CFcal using:
 
 ```
     $ python setup.py install
