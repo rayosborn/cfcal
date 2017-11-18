@@ -1,4 +1,4 @@
-__package_name__ = u'CFcal'
+__package_name__ = u'cfcal'
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions

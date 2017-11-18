@@ -3,14 +3,12 @@ import os
 import re
 import versioneer
 
-here = os.path.abspath(os.path.dirname(__file__))
-
 # Get the long description from the relevant file
 with open('DESCRIPTION.rst') as f:
     long_description = f.read()
 
 setup(
-    name="CFcal",
+    name="cfcal",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="Python calculator for crystal fields",
