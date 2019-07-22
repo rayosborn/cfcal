@@ -615,7 +615,7 @@ class CF(object):
 
         ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx = self.chis(Ts)
 
-        chi = NXfield(ChiC_zz + ChiV_zz + 2*(ChiC_xx + ChiV_xx), name="chi")
+        chi = NXfield((ChiC_zz + ChiV_zz + 2*(ChiC_xx + ChiV_xx))/3, name="chi")
         invchi = NXfield(1/chi, name='invchi')
         chiz = NXfield(ChiC_zz+ChiV_zz, name='chiz')
         chix = NXfield(ChiC_xx+ChiV_xx, name='chix')
