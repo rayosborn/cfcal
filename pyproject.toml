@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools >= 64", "setuptools_scm >= 8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cfcal"
+dynamic = ["version"]
+description = "Python calculator for crystal fields"
+readme = "README.md"
+license = {file = "COPYING"}
+authors = [{name = "Raymond Osborn", email = "rayosborn@mac.com"}]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: BSD License",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+]
+
+keywords = [
+    "neutron scattering",
+    "crystal fields",
+    "data analysis",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "https://github.com/rayosborn/cfcal"
+Repository = "https://github.com/rayosborn/cfcal.git"
+Issues = "https://github.com/rayosborn/cfcal/issues"
+Documentation = "https://github.com/rayosborn/cfcal"
+Changelog = "https://github.com/rayosborn/cfcal/releases"
+
+[tool.setuptools_scm]
+version_file = "src/cfcal/_version.py"
+
+[project.entry-points."nexpy.plugins"]
+CF = "cfcal.plugins:plugin_menu"
