@@ -1,3 +1,0 @@
-include DESCRIPTION.rst
-include versioneer.py
-include src/cfcal/_version.py

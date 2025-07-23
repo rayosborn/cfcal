@@ -48,3 +48,9 @@ Icon?
 .settings
 .project
 .pydevproject
+
+# Virtual Studio Code
+.vscode
+
+# setuptools_scm
+src/cfcal/_version.py

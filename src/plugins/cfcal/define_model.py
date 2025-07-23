@@ -1,9 +1,8 @@
-import numpy as np
-from nexpy.gui.datadialogs import BaseDialog, GridParameters
-from nexpy.gui.plotview import plotview
+from nexpy.gui.dialogs import GridParameters, NXDialog
+from nexpy.gui.pyqt import QtCore, QtGui
 from nexpy.gui.utils import report_error
-from nexusformat.nexus import *
-from cfcal.cfcal import CF
+from nexusformat.nexus import NeXusError
+
 
 def show_dialog(parent=None):
     try:
@@ -13,7 +12,7 @@ def show_dialog(parent=None):
         report_error("Defining CF Model", error)
 
 
-class DefineModelDialog(BaseDialog):
+class DefineModelDialog(NXDialog):
 
     def __init__(self, parent=None):
         super(DefineModelDialog, self).__init__(parent)
@@ -24,8 +23,8 @@ class DefineModelDialog(BaseDialog):
         symmetries = ['cubic', 'tetragonal', 'orthorhombic', 'hexagonal', 
                       'monoclinic', 'triclinic']
 
-        rare_earths = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 
-                       'Ho', 'Er', 'Tm', 'Yb']
+        self.rare_earths = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb',
+                            'Dy', 'Ho', 'Er', 'Tm', 'Yb']
 
         self.parameters = GridParameters()
         self.parameters.add('symmetry', symmetries, 'Symmetry') 
@@ -55,6 +54,7 @@ class DefineModelDialog(BaseDialog):
         self.B66_box = QtGui.QLineEdit()
         self.Hz_box = QtGui.QLineEdit()
         self.Hx_box = QtGui.QLineEdit()
+        grid = self.parameters.grid()
         grid.addWidget(QtGui.QLabel('B20:'), 0, 0)
         grid.addWidget(QtGui.QLabel('B22:'), 0, 0)
         grid.addWidget(QtGui.QLabel('Unit Cell - a (Ang):'), 1, 0)

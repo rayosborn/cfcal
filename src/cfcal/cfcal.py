@@ -1,6 +1,6 @@
 # CFcal  - Crystal Field Module
 #
-# Copyright (C) 2008-2017 R. Osborn, E. A. Goremychkin
+# Copyright (C) 2008-2025 R. Osborn, E. A. Goremychkin
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -23,10 +23,8 @@ Crystal Field calculations using the Stevens Operator formalism.
 """
 
 import os
-try:
-    from configparser import SafeConfigParser
-except ImportError:
-    from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
+
 import numpy as np
 from scipy.linalg import eigh
 
@@ -57,7 +55,7 @@ gammaJ = [0.0, 6.0994e-05, -3.7988e-05, 6.6859e-04, 0.0, 0.0, 0.0, -1.1212e-06,
           1.0350e-06, -1.2937e-06, 2.0699e-06, -5.6061e-06, 1.4800e-04]
 
 
-class CF(object):
+class CF():
     """
        Class defining the trivalent rare earth compound and its crystal field
        parameters
@@ -122,19 +120,32 @@ class CF(object):
             output = []
         output.append("%s: Nf = %s, J = %s" % (self.RE, self.Nf, self.J))
         line = []
-        if self.B20 != 0.0: line.append("B20 = %g" % self.B20)
-        if self.B22 != 0.0: line.append("B22 = %g" % self.B22)
-        if self.B40 != 0.0: line.append("B40 = %g" % self.B40)
-        if self.B42 != 0.0: line.append("B42 = %g" % self.B42)
-        if self.B43 != 0.0: line.append("B43 = %g" % self.B43)
-        if self.B44 != 0.0: line.append("B44 = %g" % self.B44)
-        if self.B60 != 0.0: line.append("B60 = %g" % self.B60)
-        if self.B62 != 0.0: line.append("B62 = %g" % self.B62)
-        if self.B63 != 0.0: line.append("B63 = %g" % self.B63)
-        if self.B64 != 0.0: line.append("B64 = %g" % self.B64)
-        if self.B66 != 0.0: line.append("B66 = %g" % self.B66)
-        if self.Hz != 0.0: line.append("Hz = %g" % self.Hz)
-        if self.Hx != 0.0: line.append("Hx = %g" % self.Hx)
+        if self.B20 != 0.0:
+            line.append("B20 = %g" % self.B20)
+        if self.B22 != 0.0:
+            line.append("B22 = %g" % self.B22)
+        if self.B40 != 0.0:
+            line.append("B40 = %g" % self.B40)
+        if self.B42 != 0.0:
+            line.append("B42 = %g" % self.B42)
+        if self.B43 != 0.0:
+            line.append("B43 = %g" % self.B43)
+        if self.B44 != 0.0:
+            line.append("B44 = %g" % self.B44)
+        if self.B60 != 0.0:
+            line.append("B60 = %g" % self.B60)
+        if self.B62 != 0.0:
+            line.append("B62 = %g" % self.B62)
+        if self.B63 != 0.0:
+            line.append("B63 = %g" % self.B63)
+        if self.B64 != 0.0:
+            line.append("B64 = %g" % self.B64)
+        if self.B66 != 0.0:
+            line.append("B66 = %g" % self.B66)
+        if self.Hz != 0.0:
+            line.append("Hz = %g" % self.Hz)
+        if self.Hx != 0.0:
+            line.append("Hx = %g" % self.Hx)
 
         if line:
             output.append(" ".join(line))
@@ -174,7 +185,7 @@ class CF(object):
     def save(self, parfile=None):
         """Store the current object for later use."""
 
-        parser = SafeConfigParser()
+        parser = ConfigParser()
         parser.optionxform = str
 
         parser.add_section('material')        
@@ -208,7 +219,7 @@ class CF(object):
             raise OSError("'%s' does not exist" % 
                           os.path.realpath(parfile))
 
-        parser = SafeConfigParser()
+        parser = ConfigParser()
         parser.read(parfile)
         
         self.name = parser.get('material', 'name')
@@ -501,7 +512,7 @@ class CF(object):
                    Hx=None, Hz=None):
         """Returns the neutron scattering cross section as a NXentry group"""
 
-        from nexusformat.nexus import NXfield, NXentry, NXsample, NXdata
+        from nexusformat.nexus import NXdata, NXentry, NXfield, NXsample
 
         if T is None:
             T = self.T
@@ -515,6 +526,8 @@ class CF(object):
         entry.data = NXdata(NXfield(S, name="intensity", units="mb/sr/meV"),
                             NXfield(eps, name="energy_transfer", units="meV"))
         return entry
+
+    nxspectrum = NXspectrum
 
     def get_moments(self, T=None):
         """Calculate the magnetic moments of the CF model."""
@@ -603,7 +616,7 @@ class CF(object):
     def NXchi(self, Ts=None):
         """Returns the susceptibility as a NeXus NXentry"""
 
-        from nexusformat.nexus import NXfield, NXentry, NXdata
+        from nexusformat.nexus import NXdata, NXentry, NXfield
 
         if Ts is None:
             Ts = np.linspace(1.0, 300.0, 300, dtype=np.float32)
@@ -630,6 +643,8 @@ class CF(object):
         entry.chix.title = "Susceptibility of %s (x-axis)" % self.name
 
         return entry
+
+    nxchi = NXchi
 
 integral_factor = np.sqrt(2*np.pi)
 sigma_factor = 2 * np.sqrt(2*np.log(2))
