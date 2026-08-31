@@ -1,6 +1,6 @@
 from . import define_model
 
-def plugin_menu(parent):
+def plugin_menu():
     menu = 'CF'
     actions = [('Set CF Parameters', define_model.show_dialog)]
     return menu, actions

@@ -3,7 +3,7 @@ requires = ["setuptools >= 64", "setuptools_scm >= 8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cfcal"
+name = "CFcal"
 dynamic = ["version"]
 description = "Python calculator for crystal fields"
 readme = "README.md"
@@ -15,12 +15,11 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Topic :: Scientific/Engineering",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
-  "Topic :: Scientific/Engineering",
+  "Programming Language :: Python :: 3.14",
 ]
 
 keywords = [
@@ -45,4 +44,4 @@ Changelog = "https://github.com/rayosborn/cfcal/releases"
 version_file = "src/cfcal/_version.py"
 
 [project.entry-points."nexpy.plugins"]
-CF = "cfcal.plugins:plugin_menu"
+CF = "cfcal.plugins.cfcal:plugin_menu"
