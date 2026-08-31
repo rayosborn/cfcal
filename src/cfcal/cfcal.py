@@ -1,6 +1,6 @@
 # CFcal  - Crystal Field Module
 #
-# Copyright (C) 2008-2025 R. Osborn, E. A. Goremychkin
+# Copyright (C) 2008-2026 R. Osborn, E. A. Goremychkin
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -242,6 +242,7 @@ class CF():
         self.initialize()
 
     def initialize(self):
+        """Reinitializes the arrays used for the CF Hamiltonian."""
         self.H = np.matrix(np.zeros((self.size, self.size), dtype='float64'))
         self.Jz = np.zeros((self.size, self.size), dtype='float64')
         self.Jp = np.zeros((self.size, self.size), dtype='float64')
@@ -275,10 +276,6 @@ class CF():
         return r2[self.index]
 
     @property
-    def r2(self):
-        return r2[self.index]
-
-    @property
     def r4(self):
         return r4[self.index]
 
@@ -299,7 +296,7 @@ class CF():
         return gammaJ[self.index]
 
     def CFham(self):
-        """Determine the CF Hamiltonian based on the input parameters."""
+        """Determine the CF Hamiltonian."""
 
         J = self.J
         H = np.matrix(np.zeros((self.size, self.size), dtype='float64'))
@@ -388,14 +385,14 @@ class CF():
         return (self.CFham() + self.MFham())
 
     def EFS(self):
-        """Calculate eigenvalues and eigenfunctions of the total Hamiltonian."""
+        """Calculate eigenvalues/functions of the total Hamiltonian."""
 
         H = self.Ham()
         self.EV, self.EF = eigh(H)
         self.EV = self.EV - self.EV.min()
 
     def TPS(self):
-        """Determine the dipole matrix elements for the total Hamiltonian."""
+        """Determine dipole matrix elements of the total Hamiltonian."""
 
         J = self.J
 
@@ -481,8 +478,7 @@ class CF():
 
     def spectrum(self, eps=None, sigma=None, gamma=None, T=None, 
                  Hx=None, Hz=None):
-        """Calculates the neutron scattering cross section.
-        """
+        """Calculates the neutron scattering cross section."""
 
         if T is None:
             T = self.T
@@ -510,7 +506,7 @@ class CF():
 
     def NXspectrum(self, eps=None, sigma=None, gamma=None, T=None, 
                    Hx=None, Hz=None):
-        """Returns the neutron scattering cross section as a NXentry group"""
+        """Returns the neutron scattering cross section."""
 
         from nexusformat.nexus import NXdata, NXentry, NXfield, NXsample
 
@@ -592,7 +588,22 @@ class CF():
         return ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx
 
     def chis(self, Ts=None):
+        """
+        Calculate the susceptibility as a function of temperature.
 
+        Parameters
+        ----------
+        Ts : array
+            The temperatures at which to calculate the susceptibility.
+            If Ts is None, then the susceptibility is calculated at 300
+            temperatures spaced evenly between 1 and 300 K.
+
+        Returns
+        -------
+        ChiC_zz, ChiC_xx, ChiV_zz, ChiV_xx : array
+            The calculated susceptibility at each temperature, split
+            into the three components.
+        """
         if Ts is None:
             Ts = np.linspace(1.0, 300.0, 300, dtype=np.float32)
 
@@ -614,8 +625,22 @@ class CF():
 
 
     def NXchi(self, Ts=None):
-        """Returns the susceptibility as a NeXus NXentry"""
+        """
+        Return the susceptibility of the crystal field model.
 
+        Parameters
+        ----------
+        Ts : array
+            The temperatures at which to calculate the susceptibility.
+            If Ts is None, then the susceptibility is calculated at 300
+            temperatures spaced evenly between 1 and 300 K.
+
+        Returns
+        -------
+        entry : NXentry
+            A NeXus data structure containing the susceptibility of the
+            crystal field model.
+        """
         from nexusformat.nexus import NXdata, NXentry, NXfield
 
         if Ts is None:
