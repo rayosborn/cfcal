@@ -10,23 +10,19 @@ temperature.
 
 Installing and Running
 ======================
-The latest version of CFcal can be downloaded from the CFcal [Git 
-repository](https://github.com/rayosborn/cfcal).
+CFcal requires Python 3.10 or later.
 
-From within the main directory, you can install CFcal using:
-
-```
-    $ python setup.py install
-```
-
-or
+The easiest way to install CFcal is from PyPI:
 
 ```
-     $ pip install ./
+    $ pip install cfcal
 ```
 
-To install in an alternate location, use:
+Alternatively, the latest development version can be installed from the CFcal
+[Git repository](https://github.com/rayosborn/cfcal):
 
 ```
-    $ python setup.py install --prefix=/path/to/installation/dir
+    $ git clone https://github.com/rayosborn/cfcal.git
+    $ cd cfcal
+    $ pip install .
 ```
