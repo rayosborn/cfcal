@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'CFcal'
-copyright = u'2017, Ray Osborn'
+copyright = u'2017-2026, Ray Osborn'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
