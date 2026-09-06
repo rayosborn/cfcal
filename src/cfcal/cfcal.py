@@ -516,6 +516,10 @@ class CF():
         if T is None:
             T = self.T
 
+        self.get_peaks(T, Hx, Hz)
+        if eps is None:
+            eps = np.linspace(-1.1*self.EV[-1], 1.1*self.EV[-1], 501)
+
         S = self.spectrum(eps, sigma, gamma, T, Hx, Hz)
         entry = NXentry()
         entry.title = "Crystal Field Spectra for %s at %s K" % (self.name, T)

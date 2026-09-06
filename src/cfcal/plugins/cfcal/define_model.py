@@ -1,7 +1,25 @@
 from nexpy.gui.dialogs import GridParameters, NXDialog
-from nexpy.gui.pyqt import QtCore, QtGui
+from nexpy.gui.plotview import NXPlotView, plotviews
+from nexpy.gui.pyqt import QtCore, getOpenFileName, getSaveFileName
 from nexpy.gui.utils import report_error
+from nexpy.gui.widgets import NXCheckBox
 from nexusformat.nexus import NeXusError
+
+PLOT_LABEL = 'Crystal Field Spectrum'
+
+B_PARAMETERS = ['B20', 'B22', 'B40', 'B42', 'B43', 'B44',
+                'B60', 'B62', 'B63', 'B64', 'B66']
+
+SYMMETRY_PARAMETERS = {
+    'cubic': ['B40', 'B44', 'B60', 'B64'],
+    'tetragonal': ['B20', 'B40', 'B44', 'B60', 'B64'],
+    'orthorhombic': ['B20', 'B22', 'B40', 'B42', 'B44',
+                     'B60', 'B62', 'B64', 'B66'],
+    'hexagonal': ['B20', 'B40', 'B60', 'B66'],
+    'monoclinic': ['B20', 'B22', 'B40', 'B42', 'B44',
+                   'B60', 'B62', 'B64', 'B66'],
+    'triclinic': B_PARAMETERS,
+}
 
 
 def show_dialog(parent=None):
@@ -15,109 +33,130 @@ def show_dialog(parent=None):
 class DefineModelDialog(NXDialog):
 
     def __init__(self, parent=None):
-        super(DefineModelDialog, self).__init__(parent)
 
-        node = self.get_node()
-        self.root = node.nxroot
-        
-        symmetries = ['cubic', 'tetragonal', 'orthorhombic', 'hexagonal', 
+        super().__init__(parent)
+
+        symmetries = ['cubic', 'tetragonal', 'orthorhombic', 'hexagonal',
                       'monoclinic', 'triclinic']
 
         self.rare_earths = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb',
                             'Dy', 'Ho', 'Er', 'Tm', 'Yb']
 
         self.parameters = GridParameters()
-        self.parameters.add('symmetry', symmetries, 'Symmetry') 
+        self.parameters.add('RE', self.rare_earths, 'Rare Earth')
+        self.parameters.add('name', '', 'Name')
+        self.parameters.add('symmetry', symmetries, 'Symmetry',
+                            slot=self.set_symmetry)
+        for name in B_PARAMETERS:
+            self.parameters.add(name, 0.0, name)
+        self.parameters.add('Hz', 0.0, 'Hz')
+        self.parameters.add('Hx', 0.0, 'Hx')
+        self.parameters.add('T', 0.0, 'Temperature (K)')
 
-        action_buttons = self.action_buttons(('Plot', self.plot_lattice),
+        action_buttons = self.action_buttons(('Load', self.load_parameters),
+                                             ('Plot', self.plot_spectrum),
                                              ('Save', self.write_parameters))
-        self.set_layout(self.entry_layout, self.parameters.grid(), 
-                        action_buttons, self.close_buttons())
+        self.overplot_checkbox = NXCheckBox('Overplot Spectrum')
+        self.line_checkbox = NXCheckBox('Plot as Line')
+        checkbox_layout = self.make_layout(self.overplot_checkbox,
+                                           self.line_checkbox, align='center')
+        self.set_layout(self.parameters.grid(header=False),
+                        action_buttons, checkbox_layout,
+                        self.close_buttons(close=True))
         self.set_title('Defining CF Model')
 
-
-    def cf_grid(self):
-        parameters = []
-        if self.symmetry == 'cubic':
-            parameters
-        
-        self.B20_box = QtGui.QLineEdit()
-        self.B22_box = QtGui.QLineEdit()
-        self.B40_box = QtGui.QLineEdit()
-        self.B42_box = QtGui.QLineEdit()
-        self.B43_box = QtGui.QLineEdit()
-        self.B44_box = QtGui.QLineEdit()
-        self.B60_box = QtGui.QLineEdit()
-        self.B62_box = QtGui.QLineEdit()
-        self.B63_box = QtGui.QLineEdit()
-        self.B64_box = QtGui.QLineEdit()
-        self.B66_box = QtGui.QLineEdit()
-        self.Hz_box = QtGui.QLineEdit()
-        self.Hx_box = QtGui.QLineEdit()
-        grid = self.parameters.grid()
-        grid.addWidget(QtGui.QLabel('B20:'), 0, 0)
-        grid.addWidget(QtGui.QLabel('B22:'), 0, 0)
-        grid.addWidget(QtGui.QLabel('Unit Cell - a (Ang):'), 1, 0)
-        grid.addWidget(QtGui.QLabel('Unit Cell - b (Ang):'), 2, 0)
-        grid.addWidget(QtGui.QLabel('Unit Cell - c (Ang):'), 3, 0)
-        grid.addWidget(QtGui.QLabel('Unit Cell - alpha (deg):'), 4, 0)
-        grid.addWidget(QtGui.QLabel('Unit Cell - beta (deg):'), 5, 0)
-        grid.addWidget(QtGui.QLabel('Unit Cell - gamma (deg):'), 6, 0)
-        grid.addWidget(QtGui.QLabel('Wavelength (Ang):'), 7, 0)
-        grid.addWidget(QtGui.QLabel('Distance (mm):'), 8, 0)
-        grid.addWidget(QtGui.QLabel('Yaw (deg):'), 9, 0)
-        grid.addWidget(QtGui.QLabel('Pitch (deg):'), 10, 0)
-        grid.addWidget(QtGui.QLabel('Roll (deg):'), 11, 0)
- 
-
-    def update_parameter(self, box, value):
-        if value is not None:
-            box.setText(str(value))
-
-    def update_parameters(self):
-        self.update_parameter(self.unitcell_a_box, self.refine.a)
-        self.update_parameter(self.unitcell_b_box, self.refine.b)
-        self.update_parameter(self.unitcell_c_box, self.refine.c)
-        self.update_parameter(self.unitcell_alpha_box, self.refine.alpha)
-        self.update_parameter(self.unitcell_beta_box, self.refine.beta)
-        self.update_parameter(self.unitcell_gamma_box, self.refine.gamma)
-        self.update_parameter(self.wavelength_box, self.refine.wavelength)
-        self.update_parameter(self.distance_box, self.refine.distance)
-        self.update_parameter(self.yaw_box, self.refine.yaw)
-        self.update_parameter(self.pitch_box, self.refine.pitch)
-        self.update_parameter(self.roll_box, self.refine.roll)
-        self.update_parameter(self.xc_box, self.refine.xc)
-        self.update_parameter(self.yc_box, self.refine.yc)
-
-    @property
-    def symmetry(self):
-        return self.symmetry_box.currentText()
+        self.set_symmetry()
+        self.update_overplot_checkbox()
 
     def set_symmetry(self):
-        self.refine.symmetry = self.get_symmetry()
-        self.refine.set_symmetry()
-        self.update_parameters()
-        if self.refine.symmetry == 'cubic':
-            self.unitcell_b_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_c_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_alpha_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_beta_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_gamma_checkbox.setCheckState(QtCore.Qt.Unchecked)
-        elif self.refine.symmetry == 'tetragonal':
-            self.unitcell_b_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_alpha_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_beta_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_gamma_checkbox.setCheckState(QtCore.Qt.Unchecked)
-        elif self.refine.symmetry == 'orthorhombic':
-            self.unitcell_alpha_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_beta_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_gamma_checkbox.setCheckState(QtCore.Qt.Unchecked)
-        elif self.refine.symmetry == 'hexagonal':
-            self.unitcell_b_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_alpha_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_beta_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_gamma_checkbox.setCheckState(QtCore.Qt.Unchecked)
-        elif self.refine.symmetry == 'monoclinic':
-            self.unitcell_alpha_checkbox.setCheckState(QtCore.Qt.Unchecked)
-            self.unitcell_gamma_checkbox.setCheckState(QtCore.Qt.Unchecked)
+        enabled = SYMMETRY_PARAMETERS[self.parameters['symmetry'].value]
+        for name in B_PARAMETERS:
+            self.parameters[name].box.setEnabled(name in enabled)
 
+    def update_overplot_checkbox(self):
+        exists = PLOT_LABEL in plotviews
+        self.overplot_checkbox.setEnabled(exists)
+        if not exists:
+            self.overplot_checkbox.setChecked(False)
+
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        if (event.type() == QtCore.QEvent.ActivationChange
+                and self.isActiveWindow()):
+            self.update_overplot_checkbox()
+
+    def infer_symmetry(self, nonzero):
+        """Return the smallest symmetry whose parameters include `nonzero`."""
+        for symmetry in sorted(SYMMETRY_PARAMETERS,
+                               key=lambda s: len(SYMMETRY_PARAMETERS[s])):
+            if set(nonzero).issubset(SYMMETRY_PARAMETERS[symmetry]):
+                return symmetry
+        return 'triclinic'
+
+    def set_cf(self, cf):
+        self.parameters['RE'].value = cf.RE
+        self.parameters['name'].value = cf.name or ''
+        nonzero = [name for name in B_PARAMETERS
+                  if getattr(cf, name) != 0.0]
+        self.parameters['symmetry'].value = self.infer_symmetry(nonzero)
+        self.set_symmetry()
+        for name in B_PARAMETERS:
+            self.parameters[name].value = getattr(cf, name)
+        self.parameters['Hz'].value = cf.Hz
+        self.parameters['Hx'].value = cf.Hx
+        self.parameters['T'].value = cf.T
+
+    def get_cf(self):
+        from cfcal import CF
+
+        cf = CF(RE=self.parameters['RE'].value,
+                name=self.parameters['name'].value or None)
+        for name in B_PARAMETERS:
+            if self.parameters[name].box.isEnabled():
+                setattr(cf, name, self.parameters[name].value)
+            else:
+                setattr(cf, name, 0.0)
+        cf.Hz = self.parameters['Hz'].value
+        cf.Hx = self.parameters['Hx'].value
+        cf.T = self.parameters['T'].value
+        return cf
+
+    def load_parameters(self):
+        from cfcal import CF
+
+        try:
+            fname = getOpenFileName(self, "Choose a Filename")
+            if fname:
+                self.set_cf(CF(parfile=fname))
+        except Exception as error:
+            report_error("Loading CF Parameters", error)
+
+    def plot_spectrum(self):
+        try:
+            cf = self.get_cf()
+            entry = cf.NXspectrum()
+            opts = {}
+            if (self.overplot_checkbox.isEnabled()
+                    and self.overplot_checkbox.isChecked()):
+                opts['over'] = True
+            if self.line_checkbox.isChecked():
+                opts['marker'] = 'None'
+                opts['linestyle'] = '-'
+            if PLOT_LABEL in plotviews:
+                plotview = plotviews[PLOT_LABEL]
+            else:
+                plotview = NXPlotView(PLOT_LABEL)
+            plotview.plot(entry.data, **opts)
+            self.update_overplot_checkbox()
+        except Exception as error:
+            report_error("Plotting CF Spectrum", error)
+
+    def write_parameters(self):
+        try:
+            cf = self.get_cf()
+            fname = getSaveFileName(self, "Choose a Filename",
+                                    f"{cf.name or 'model'}.cfg")
+            if fname:
+                cf.save(fname)
+        except Exception as error:
+            report_error("Saving CF Parameters", error)
