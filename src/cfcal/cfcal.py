@@ -106,6 +106,9 @@ class CF():
         self.muz = 0.0
         self.mux = 0.0
 
+    def __repr__(self):
+        return f"CF(RE='{self.RE}' name='{self.name}')"
+
     def __str__(self):
         """
         Return a summary of the model parameters
@@ -209,7 +212,7 @@ class CF():
 
         if parfile is None:
             parfile = '%s.cfg' % self.name
-        with open(parfile, 'wb') as cfg:
+        with open(parfile, 'w') as cfg:
             parser.write(cfg)
 
     def load(self, parfile):
