@@ -55,6 +55,9 @@ gammaJ = [0.0, 6.0994e-05, -3.7988e-05, 6.6859e-04, 0.0, 0.0, 0.0, -1.1212e-06,
           1.0350e-06, -1.2937e-06, 2.0699e-06, -5.6061e-06, 1.4800e-04]
 
 
+R_GAS = 8.314462618  # molar gas constant in J/mol/K
+
+
 class CF():
     """
        Class defining the trivalent rare earth compound and its crystal field
@@ -678,6 +681,88 @@ class CF():
         return entry
 
     nxchi = NXchi
+
+    def thermodynamics(self, Ts=None):
+        """
+        Calculate the crystal field specific heat and entropy.
+
+        Parameters
+        ----------
+        Ts : array
+            The temperatures at which to calculate the properties. If Ts
+            is None, then they are calculated at 300 temperatures spaced
+            evenly between 1 and 300 K.
+
+        Returns
+        -------
+        Cm, S : array
+            The magnetic (Schottky) specific heat and entropy, both in
+            units of J/mol/K.
+        """
+        if Ts is None:
+            Ts = np.linspace(1.0, 300.0, 300, dtype=np.float32)
+        Ts = np.atleast_1d(np.asarray(Ts, dtype='float64'))
+
+        self.EFS()
+
+        kT = Ts[:, np.newaxis] / 11.6045
+        P = np.exp(-self.EV[np.newaxis, :] / kT)
+        Z = P.sum(axis=1)
+        E1 = (self.EV * P).sum(axis=1) / Z
+        E2 = (self.EV**2 * P).sum(axis=1) / Z
+        kT = kT[:, 0]
+
+        Cm = R_GAS * (E2 - E1**2) / kT**2
+        S = R_GAS * (E1 / kT + np.log(Z))
+
+        return Cm, S
+
+    def specific_heat(self, Ts=None):
+        """Return the Schottky specific heat in J/mol/K."""
+        return self.thermodynamics(Ts)[0]
+
+    def entropy(self, Ts=None):
+        """Return the crystal field entropy in J/mol/K."""
+        return self.thermodynamics(Ts)[1]
+
+    def NXthermo(self, Ts=None):
+        """
+        Return the specific heat and entropy of the crystal field model.
+
+        Parameters
+        ----------
+        Ts : array
+            The temperatures at which to calculate the properties. If Ts
+            is None, then they are calculated at 300 temperatures spaced
+            evenly between 1 and 300 K.
+
+        Returns
+        -------
+        entry : NXentry
+            A NeXus data structure containing the specific heat and
+            entropy of the crystal field model.
+        """
+        from nexusformat.nexus import NXdata, NXentry, NXfield
+
+        if Ts is None:
+            Ts = np.linspace(1.0, 300.0, 300, dtype=np.float32)
+
+        Cm, S = self.thermodynamics(Ts)
+
+        entry = NXentry()
+        entry.title = "Thermodynamics of %s" % self.name
+        temperature = NXfield(Ts, name="temperature")
+        temperature.units = "K"
+
+        entry.specific_heat = NXdata(NXfield(Cm, name="specific_heat"),
+                                     temperature)
+        entry.specific_heat.title = "Specific Heat of %s" % self.name
+        entry.entropy = NXdata(NXfield(S, name="entropy"), temperature)
+        entry.entropy.title = "Entropy of %s" % self.name
+
+        return entry
+
+    nxthermo = NXthermo
 
 integral_factor = np.sqrt(2*np.pi)
 sigma_factor = 2 * np.sqrt(2*np.log(2))
