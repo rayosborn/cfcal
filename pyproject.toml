@@ -33,6 +33,9 @@ dependencies = [
     "scipy",
 ]
 
+[project.optional-dependencies]
+nexpy = ["lmfit"]
+
 [project.urls]
 Homepage = "https://github.com/rayosborn/cfcal"
 Repository = "https://github.com/rayosborn/cfcal.git"
@@ -45,3 +48,6 @@ version_file = "src/cfcal/_version.py"
 
 [project.entry-points."nexpy.plugins"]
 CF = "cfcal.plugins.cfcal:plugin_menu"
+
+[project.entry-points."nexpy.models"]
+cfcal = "cfcal.plugins.cfcal.models"

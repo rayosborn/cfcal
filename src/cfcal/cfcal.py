@@ -779,8 +779,8 @@ def pseudovoigt(x, center, sigma, gamma):
     FWHM = (GammaG**5 + 
             2.69269 * GammaG**4 * GammaL + 
             2.42843 * GammaG**3 * GammaL**2 + 
-            4.47163 * GammaG**2 + GammaL**3 +
-            0.07842 * GammaG**4 * GammaL +
+            4.47163 * GammaG**2 * GammaL**3 +
+            0.07842 * GammaG * GammaL**4 +
             GammaL**5)**(0.2)
     ratio = GammaL / FWHM
     fraction = 1.36603 * ratio - 0.47719 * ratio**2 + 0.11116 * ratio**3
