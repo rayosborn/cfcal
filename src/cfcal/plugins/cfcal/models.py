@@ -38,7 +38,7 @@ class CFModel(Model):
     ``B63``, ``B64``, ``B66`` (Stevens crystal-field parameters, meV),
     ``Hz`` and ``Hx`` (longitudinal and transverse Zeeman terms, meV),
     ``T`` (sample temperature, K), ``sigma`` and ``gamma`` (Gaussian and
-    Lorentzian pseudo-Voigt widths, meV), and ``scale`` (overall
+    Lorentzian Voigt widths, meV), and ``scale`` (overall
     intensity scale factor).
 
     .. math::
@@ -50,7 +50,7 @@ class CFModel(Model):
     where the crystal-field Hamiltonian is diagonalized using the Stevens
     Operator formalism to yield transition energies :math:`E_i` and
     thermally-weighted intensities :math:`I_i`, and :math:`V` is a
-    pseudo-Voigt profile that reduces to a pure Gaussian of width
+    Voigt profile that reduces to a pure Gaussian of width
     :math:`\sigma` when :math:`\gamma = 0` (the default).
 
     The rare-earth ion is not a fittable Parameter but is selected at
@@ -116,7 +116,7 @@ class CFModel(Model):
         self.lines = cf_lines
 
         self.set_param_hint('sigma', min=0)
-        self.set_param_hint('gamma', min=0, vary=False)
+        self.set_param_hint('gamma', min=0)
         self.set_param_hint('scale', min=0)
         self.set_param_hint('T', min=0, vary=False)
         self.set_param_hint('Hz', vary=False)

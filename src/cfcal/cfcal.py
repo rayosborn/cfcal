@@ -27,6 +27,7 @@ from configparser import ConfigParser
 
 import numpy as np
 from scipy.linalg import eigh
+from scipy.special import voigt_profile
 
 REs = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 
        'Yb']
@@ -504,7 +505,7 @@ class CF():
             elif sigma is None and gamma is not None:
                 S += IT * lorentz(eps, EV, gamma)
             else:
-                S += IT * pseudovoigt(eps, EV, sigma, gamma)
+                S += IT * voigt(eps, EV, sigma, gamma)
 
         S *= 72.65*self.gJ**2
 
@@ -765,7 +766,6 @@ class CF():
     nxthermo = NXthermo
 
 integral_factor = np.sqrt(2*np.pi)
-sigma_factor = 2 * np.sqrt(2*np.log(2))
 
 def gauss(x, center, sigma):
     return np.exp(-(x-center)**2/(2*sigma**2)) / (sigma * integral_factor)
@@ -773,16 +773,5 @@ def gauss(x, center, sigma):
 def lorentz(x, center, gamma):
     return (gamma / np.pi) / ((x - center) ** 2 + gamma ** 2)
 
-def pseudovoigt(x, center, sigma, gamma):
-    GammaG = sigma_factor * sigma
-    GammaL = 2 * gamma
-    FWHM = (GammaG**5 + 
-            2.69269 * GammaG**4 * GammaL + 
-            2.42843 * GammaG**3 * GammaL**2 + 
-            4.47163 * GammaG**2 * GammaL**3 +
-            0.07842 * GammaG * GammaL**4 +
-            GammaL**5)**(0.2)
-    ratio = GammaL / FWHM
-    fraction = 1.36603 * ratio - 0.47719 * ratio**2 + 0.11116 * ratio**3
-    return ((1-fraction) * gauss(x, center, sigma) + 
-            fraction * lorentz(x, center, gamma))
+def voigt(x, center, sigma, gamma):
+    return voigt_profile(x - center, sigma, gamma)
